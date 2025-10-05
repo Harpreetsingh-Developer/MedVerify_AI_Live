@@ -1,0 +1,71 @@
+{
+  "name": "ProviderValidationAgent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "validate",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": 200,
+          "responseData": {
+            "type": "json",
+            "data": {
+              "status": "received",
+              "message": "Validation request accepted"
+            }
+          }
+        }
+      },
+      "id": "WebhookValidate",
+      "name": "Webhook Validate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "path": "status/:id",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": 200,
+          "responseData": {
+            "type": "json",
+            "data": {
+              "status": "pending",
+              "id": "={{$json.id}}"
+            }
+          }
+        }
+      },
+      "id": "WebhookStatus",
+      "name": "Webhook Status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$json.providerApi}}",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "HTTPValidateProvider",
+      "name": "HTTP Validate Provider",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook Validate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Validate Provider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

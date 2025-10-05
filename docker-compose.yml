@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo:6
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/medportal
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook
+      - JWT_SECRET=${JWT_SECRET:-changeme-supersecret}
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+      - n8n
+
+  frontend:
+    build: ./frontend
+    environment:
+      - NEXT_PUBLIC_N8N_WEBHOOK_URL=http://localhost:5678/webhook
+      - NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=${NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:-}
+      - NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL=${NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL:-}
+      - NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
+      - NEXT_PUBLIC_INTERCOM_APP_ID=${NEXT_PUBLIC_INTERCOM_APP_ID:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  mongo_data:
+  n8n_data:

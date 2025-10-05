@@ -1,0 +1,45 @@
+# Root Dockerfile (single-container option)
+# This builds frontend and backend and runs both via PM2.
+
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy root files
+COPY package.json package-lock.json ./
+
+# Copy frontend and backend manifests and install separately for caching
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+COPY backend/package.json backend/package-lock.json ./backend/
+
+RUN npm i -g pm2@latest && \
+    cd frontend && npm ci && cd .. && \
+    cd backend && npm ci && cd ..
+
+# Copy source and build frontend
+COPY frontend ./frontend
+COPY backend ./backend
+RUN cd frontend && npm run build
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN apk add --no-cache dumb-init
+
+# Backend runtime deps
+COPY --from=builder /app/backend/package*.json ./backend/
+RUN cd backend && npm ci --only=production
+COPY --from=builder /app/backend ./backend
+
+# Frontend runtime deps and build
+COPY --from=builder /app/frontend/package*.json ./frontend/
+RUN cd frontend && npm ci --only=production
+COPY --from=builder /app/frontend/.next ./frontend/.next
+COPY --from=builder /app/frontend/public ./frontend/public
+COPY --from=builder /app/frontend/next.config.ts ./frontend/next.config.ts
+
+EXPOSE 3000 4000
+
+# Start both services (frontend + backend)
+# Use dumb-init as PID 1 for proper signal handling
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["sh", "-c", "node backend/server.js & node frontend/node_modules/next/dist/bin/next start -p 3000 -H 0.0.0.0"]
