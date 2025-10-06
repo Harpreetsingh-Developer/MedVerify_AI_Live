@@ -1,13 +1,11 @@
-# Root Dockerfile (single-container option)
-# This builds frontend and backend and runs both via PM2.
 
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy root files
+
 COPY package.json package-lock.json ./
 
-# Copy frontend and backend manifests and install separately for caching
+
 COPY frontend/package.json frontend/package-lock.json ./frontend/
 COPY backend/package.json backend/package-lock.json ./backend/
 
@@ -15,7 +13,6 @@ RUN npm i -g pm2@latest && \
     cd frontend && npm ci && cd .. && \
     cd backend && npm ci && cd ..
 
-# Copy source and build frontend
 COPY frontend ./frontend
 COPY backend ./backend
 RUN cd frontend && npm run build
