@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme-supersecret';
 
-// In-memory users for stub (replace with MongoDB models in production)
+
 const users = new Map();
 const pending2FA = new Map();
 
@@ -22,7 +22,7 @@ router.post('/login', (req, res) => {
   if (!user || user.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   pending2FA.set(email, code);
-  // In production, send the 2FA code via email/SMS provider
+  
   res.json({ message: '2FA code sent', email });
 });
 

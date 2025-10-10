@@ -3,7 +3,7 @@ const Doctor = require('../models/Doctor');
 
 const router = express.Router();
 
-// List with filters
+
 router.get('/', async (req, res) => {
   try {
     const { specialty, location, minRating } = req.query;
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Create (stub)
+
 router.post('/', async (req, res) => {
   try {
     const doc = await Doctor.create(req.body);
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get by id
+
 router.get('/:id', async (req, res) => {
   try {
     const doc = await Doctor.findById(req.params.id);

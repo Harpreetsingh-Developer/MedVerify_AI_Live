@@ -17,13 +17,13 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Routes
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/doctors', require('./routes/doctors'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/cms', require('./routes/cms'));
 
-// n8n webhook proxy
+
 app.post('/validate', async (req, res) => {
   try {
     const { data } = await axios.post(`${N8N_WEBHOOK_URL}/validate`, req.body);

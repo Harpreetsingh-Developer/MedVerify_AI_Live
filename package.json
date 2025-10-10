@@ -1,0 +1,7 @@
+{
+    "name": "medverify-root",
+    "private": true,
+    "scripts": {
+        "strip:comments": "node scripts/removeComments.js"
+    }
+}
